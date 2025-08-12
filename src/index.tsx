@@ -8,7 +8,8 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 // Ativa ajuste automático do scroll ao abrir teclado (apenas mobile)
-if (typeof window !== 'undefined' && (window as any).Capacitor) {
+// Só executa Keyboard.setScroll se estiver em ambiente Capacitor (mobile)
+if (typeof navigator !== 'undefined' && navigator.userAgent.includes('Capacitor')) {
   Keyboard.setScroll({ isDisabled: false });
 }
 

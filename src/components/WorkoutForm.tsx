@@ -11,7 +11,7 @@ const WorkoutForm: React.FC = () => {
     notes: '',
   });
   const [exercises, setExercises] = useState<Exercise[]>([
-    { name: '', sets: 3, reps: 10, weight: 0 }
+  { name: '', sets: 3, reps: 10, weight: 0, duration: 0, rest: 0, type: '', notes: '', intensity: '' }
   ]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -23,7 +23,7 @@ const WorkoutForm: React.FC = () => {
   };
 
   const addExercise = () => {
-    setExercises(prev => [...prev, { name: '', sets: 3, reps: 10, weight: 0 }]);
+  setExercises(prev => [...prev, { name: '', sets: 3, reps: 10, weight: 0, duration: 0, rest: 0, type: '', notes: '', intensity: '' }]);
   };
 
   const removeExercise = (index: number) => {
@@ -75,61 +75,66 @@ const WorkoutForm: React.FC = () => {
     const hasLimitation = user.physicalLimitations && user.physicalLimitations.length > 0;
     if (user.workoutLocation === 'gym') {
       if (user.goal === 'lose') {
+        // Emagrecimento: circuito cardio + funcional, 45-60min
         return [
-          { name: 'Esteira', sets: 1, reps: 0, duration: 25, type: 'cardio' },
-          { name: 'Bicicleta', sets: 1, reps: 0, duration: 20, type: 'cardio' },
-          { name: 'Elíptico', sets: 1, reps: 0, duration: 15, type: 'cardio' },
-          { name: 'Abdominal', sets: 3, reps: 15, type: 'strength' }
+          { name: 'Aquecimento na esteira', sets: 1, reps: 0, duration: 10, type: 'cardio' },
+          { name: 'Circuito funcional (agachamento, polichinelo, abdominal)', sets: 4, reps: 20, duration: 15, type: 'mixed' },
+          { name: 'Bicicleta ergométrica', sets: 1, reps: 0, duration: 20, type: 'cardio' },
+          { name: 'Remada baixa', sets: 4, reps: 15, duration: 10, type: 'strength' },
+          { name: 'Flexão de braço', sets: 4, reps: 15, duration: 10, type: 'strength' },
+          { name: 'Prancha', sets: 3, reps: 0, duration: 40, type: 'core' },
+          { name: 'Abdominal', sets: 4, reps: 20, duration: 0, type: 'core' },
+          { name: 'Alongamento', sets: 1, reps: 0, duration: 8, type: 'flexibility' }
         ];
       }
       if (user.gender === 'male') {
         const maleRoutine = {
           gain: [
-            { day: 'Segunda', exercises: ['Supino reto', 'Supino inclinado', 'Crossover', 'Tríceps pulley', 'Mergulho'] },
-            { day: 'Terça', exercises: ['Puxada frente', 'Remada baixa', 'Remada unilateral', 'Rosca direta', 'Rosca alternada'] },
-            { day: 'Quarta', exercises: ['Agachamento', 'Leg press', 'Cadeira extensora', 'Cadeira flexora', 'Panturrilha'] },
-            { day: 'Quinta', exercises: ['Desenvolvimento', 'Elevação lateral', 'Elevação frontal', 'Abdominal', 'Prancha'] },
-            { day: 'Sexta', exercises: ['Supino reto', 'Puxada frente', 'Remada curvada', 'Crossover', 'Tríceps banco'] },
-            { day: 'Sábado', exercises: ['Agachamento', 'Leg press', 'Abdominal', 'Prancha', 'Panturrilha'] },
-            { day: 'Domingo', exercises: ['Caminhada', 'Bicicleta', 'Alongamento'] }
+            { day: 'Segunda', exercises: ['Supino reto (4x10)', 'Supino inclinado (4x10)', 'Crossover (3x12)', 'Tríceps pulley (3x12)', 'Mergulho (3x12)'] },
+            { day: 'Terça', exercises: ['Puxada frente (4x10)', 'Remada baixa (4x10)', 'Remada unilateral (3x12)', 'Rosca direta (3x12)', 'Rosca alternada (3x12)'] },
+            { day: 'Quarta', exercises: ['Agachamento (4x10)', 'Leg press (4x10)', 'Cadeira extensora (3x12)', 'Cadeira flexora (3x12)', 'Panturrilha (4x15)'] },
+            { day: 'Quinta', exercises: ['Desenvolvimento (4x10)', 'Elevação lateral (3x12)', 'Elevação frontal (3x12)', 'Abdominal (4x15)', 'Prancha (3x1min)'] },
+            { day: 'Sexta', exercises: ['Supino reto (4x10)', 'Puxada frente (4x10)', 'Remada curvada (3x12)', 'Crossover (3x12)', 'Tríceps banco (3x12)'] },
+            { day: 'Sábado', exercises: ['Agachamento (4x10)', 'Leg press (4x10)', 'Abdominal (4x15)', 'Prancha (3x1min)', 'Panturrilha (4x15)'] },
+            { day: 'Domingo', exercises: ['Caminhada (40min)', 'Bicicleta (30min)', 'Alongamento (10min)'] }
           ],
           maintain: [
-            { day: 'Segunda', exercises: ['Supino reto', 'Agachamento', 'Remada baixa', 'Desenvolvimento', 'Abdominal'] },
-            { day: 'Terça', exercises: ['Corrida', 'HIIT', 'Prancha', 'Abdominal'] },
-            { day: 'Quarta', exercises: ['Agachamento', 'Leg press', 'Desenvolvimento', 'Elevação lateral'] },
-            { day: 'Quinta', exercises: ['Remada curvada', 'Puxada frente', 'Rosca direta', 'Rosca alternada'] },
-            { day: 'Sexta', exercises: ['Supino reto', 'Supino inclinado', 'Tríceps pulley', 'Mergulho'] },
-            { day: 'Sábado', exercises: ['Caminhada', 'Bicicleta', 'Alongamento'] },
+            { day: 'Segunda', exercises: ['Supino reto (3x12)', 'Agachamento (3x12)', 'Remada baixa (3x12)', 'Desenvolvimento (3x12)', 'Abdominal (3x15)'] },
+            { day: 'Terça', exercises: ['Corrida (30min)', 'HIIT (20min)', 'Prancha (3x1min)', 'Abdominal (3x15)'] },
+            { day: 'Quarta', exercises: ['Agachamento (3x12)', 'Leg press (3x12)', 'Desenvolvimento (3x12)', 'Elevação lateral (3x12)'] },
+            { day: 'Quinta', exercises: ['Remada curvada (3x12)', 'Puxada frente (3x12)', 'Rosca direta (3x12)', 'Rosca alternada (3x12)'] },
+            { day: 'Sexta', exercises: ['Supino reto (3x12)', 'Supino inclinado (3x12)', 'Tríceps pulley (3x12)', 'Mergulho (3x12)'] },
+            { day: 'Sábado', exercises: ['Caminhada (40min)', 'Bicicleta (30min)', 'Alongamento (10min)'] },
             { day: 'Domingo', exercises: [] }
           ]
         };
         const routine = maleRoutine[user.goal] || maleRoutine['gain'];
         const todayRoutine = routine.find((r) => r.day === todayName) || routine[0];
-        return todayRoutine.exercises.map(name => ({ name, sets: 3, reps: 10, type: 'strength' }));
+  return todayRoutine.exercises.map(name => ({ name, sets: 3, reps: 10, duration: 0, type: 'strength' }));
       } else {
         const femaleRoutine = {
           gain: [
-            { day: 'Segunda', exercises: ['Agachamento', 'Cadeira extensora', 'Leg press', 'Afundo', 'Avanço'] },
-            { day: 'Terça', exercises: ['Cadeira flexora', 'Stiff', 'Glúteo máquina', 'Elevação pélvica', 'Abdução'] },
-            { day: 'Quarta', exercises: ['Desenvolvimento', 'Puxada frente', 'Remada baixa', 'Rosca direta', 'Tríceps pulley'] },
-            { day: 'Quinta', exercises: ['Agachamento', 'Leg press', 'Abdominal', 'Prancha', 'Cadeira extensora'] },
-            { day: 'Sexta', exercises: ['Stiff', 'Glúteo máquina', 'Abdução', 'Abdominal', 'Prancha'] },
-            { day: 'Sábado', exercises: ['Desenvolvimento', 'Puxada frente', 'Remada curvada', 'Rosca alternada', 'Tríceps banco'] },
-            { day: 'Domingo', exercises: ['Caminhada', 'Bicicleta', 'Alongamento'] }
+            { day: 'Segunda', exercises: ['Agachamento (4x10)', 'Cadeira extensora (4x10)', 'Leg press (4x10)', 'Afundo (3x12)', 'Avanço (3x12)'] },
+            { day: 'Terça', exercises: ['Cadeira flexora (4x10)', 'Stiff (4x10)', 'Glúteo máquina (3x12)', 'Elevação pélvica (3x12)', 'Abdução (3x15)'] },
+            { day: 'Quarta', exercises: ['Desenvolvimento (4x10)', 'Puxada frente (4x10)', 'Remada baixa (3x12)', 'Rosca direta (3x12)', 'Tríceps pulley (3x12)'] },
+            { day: 'Quinta', exercises: ['Agachamento (4x10)', 'Leg press (4x10)', 'Abdominal (4x15)', 'Prancha (3x1min)', 'Cadeira extensora (3x12)'] },
+            { day: 'Sexta', exercises: ['Stiff (4x10)', 'Glúteo máquina (3x12)', 'Abdução (3x15)', 'Abdominal (4x15)', 'Prancha (3x1min)'] },
+            { day: 'Sábado', exercises: ['Desenvolvimento (4x10)', 'Puxada frente (4x10)', 'Remada curvada (3x12)', 'Rosca alternada (3x12)', 'Tríceps banco (3x12)'] },
+            { day: 'Domingo', exercises: ['Caminhada (40min)', 'Bicicleta (30min)', 'Alongamento (10min)'] }
           ],
           maintain: [
-            { day: 'Segunda', exercises: ['Agachamento', 'Desenvolvimento', 'Remada baixa', 'Abdominal', 'Prancha'] },
-            { day: 'Terça', exercises: ['Corrida', 'HIIT', 'Prancha', 'Abdominal'] },
-            { day: 'Quarta', exercises: ['Stiff', 'Glúteo máquina', 'Abdução', 'Cadeira flexora'] },
-            { day: 'Quinta', exercises: ['Agachamento', 'Cadeira extensora', 'Desenvolvimento', 'Elevação lateral'] },
-            { day: 'Sexta', exercises: ['Desenvolvimento', 'Puxada frente', 'Remada curvada', 'Rosca alternada', 'Tríceps banco'] },
-            { day: 'Sábado', exercises: ['Caminhada', 'Bicicleta', 'Alongamento'] },
+            { day: 'Segunda', exercises: ['Agachamento (3x12)', 'Desenvolvimento (3x12)', 'Remada baixa (3x12)', 'Abdominal (3x15)', 'Prancha (3x1min)'] },
+            { day: 'Terça', exercises: ['Corrida (30min)', 'HIIT (20min)', 'Prancha (3x1min)', 'Abdominal (3x15)'] },
+            { day: 'Quarta', exercises: ['Stiff (3x12)', 'Glúteo máquina (3x12)', 'Abdução (3x15)', 'Cadeira flexora (3x12)'] },
+            { day: 'Quinta', exercises: ['Agachamento (3x12)', 'Cadeira extensora (3x12)', 'Desenvolvimento (3x12)', 'Elevação lateral (3x12)'] },
+            { day: 'Sexta', exercises: ['Desenvolvimento (3x12)', 'Puxada frente (3x12)', 'Remada curvada (3x12)', 'Rosca alternada (3x12)', 'Tríceps banco (3x12)'] },
+            { day: 'Sábado', exercises: ['Caminhada (40min)', 'Bicicleta (30min)', 'Alongamento (10min)'] },
             { day: 'Domingo', exercises: [] }
           ]
         };
         const routine = femaleRoutine[user.goal] || femaleRoutine['gain'];
         const todayRoutine = routine.find((r) => r.day === todayName) || routine[0];
-        return todayRoutine.exercises.map(name => ({ name, sets: 3, reps: 10, type: 'strength' }));
+  return todayRoutine.exercises.map(name => ({ name, sets: 3, reps: 10, duration: 0, type: 'strength' }));
       }
     }
     return [];
@@ -178,17 +183,73 @@ const WorkoutForm: React.FC = () => {
         {personalizedSuggestion.length > 0 && (
           <div className="card mb-6">
             <div className="flex items-center space-x-3 mb-4">
-              <Target className="w-5 h-5 text-primary-600" />
-              <h3 className="text-lg font-semibold">Treino sugerido para hoje</h3>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {personalizedSuggestion.length > 0 && (
+                <div className="card mb-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <Target className="w-5 h-5 text-primary-600" />
+                    <h3 className="text-lg font-semibold">Treino sugerido para hoje</h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {personalizedSuggestion.map((suggestion, index) => (
+                      <div
+                        key={index}
+                        className="bg-primary-50 border border-primary-200 rounded-lg px-4 py-3 text-left"
+                      >
+                        <div className="font-medium text-primary-800">{suggestion.name}</div>
+                        <div className="text-xs text-primary-600">
+                          {suggestion.sets}x{suggestion.reps}
+                          {/* Exibe tempo apenas para exercícios de tempo (reps = 0) */}
+                          {suggestion.reps === 0 && suggestion.duration > 0 ? ` • ${suggestion.duration}s` : ''}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                      <input
+                        type="number"
+                        value={exercise.rest || 0}
+                        onChange={(e) => updateExercise(index, 'rest', parseInt(e.target.value) || 0)}
+                        className="input-field text-sm py-2"
+                        min="0"
+                        max="600"
+                        step="1"
+                        placeholder="Descanso em segundos"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Intensidade</label>
+                      <select
+                        value={exercise.intensity || ''}
+                        onChange={(e) => updateExercise(index, 'intensity', e.target.value)}
+                        className="input-field text-sm py-2"
+                      >
+                        <option value="">Selecione</option>
+                        <option value="leve">Leve</option>
+                        <option value="moderado">Moderado</option>
+                        <option value="intenso">Intenso</option>
+                      </select>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs text-gray-600 mb-1">Observações</label>
+                      <input
+                        type="text"
+                        value={exercise.notes || ''}
+                        onChange={(e) => updateExercise(index, 'notes', e.target.value)}
+                        className="input-field text-sm py-2"
+                        placeholder="Observações ou dicas do exercício"
+                      />
+                    </div>
               {personalizedSuggestion.map((suggestion, index) => (
                 <div
                   key={index}
                   className="bg-primary-50 border border-primary-200 rounded-lg px-4 py-3 text-left"
                 >
                   <div className="font-medium text-primary-800">{suggestion.name}</div>
-                  <div className="text-xs text-primary-600">{suggestion.sets}x{suggestion.reps} {suggestion.duration ? `• ${suggestion.duration}s` : ''}</div>
+                  <div className="text-xs text-primary-600">
+                    {suggestion.sets}x{suggestion.reps}
+                    {/* Exibe tempo apenas para exercícios de tempo (reps = 0) */}
+                    {suggestion.reps === 0 && suggestion.duration > 0 ? ` • ${suggestion.duration}s` : ''}
+                  </div>
                 </div>
               ))}
             </div>
@@ -291,7 +352,6 @@ const WorkoutForm: React.FC = () => {
                         required
                       />
                     </div>
-                    
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Séries</label>
                       <input
@@ -304,7 +364,6 @@ const WorkoutForm: React.FC = () => {
                         required
                       />
                     </div>
-                    
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Repetições</label>
                       <input
@@ -317,7 +376,6 @@ const WorkoutForm: React.FC = () => {
                         required
                       />
                     </div>
-                    
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Peso (kg)</label>
                       <input
@@ -327,6 +385,71 @@ const WorkoutForm: React.FC = () => {
                         className="input-field text-sm py-2"
                         min="0"
                         step="0.5"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Tempo (segundos)</label>
+                      <input
+                        type="number"
+                        value={exercise.duration || 0}
+                        onChange={(e) => updateExercise(index, 'duration', parseInt(e.target.value) || 0)}
+                        className="input-field text-sm py-2"
+                        min="0"
+                        max="600"
+                        step="1"
+                        placeholder="Tempo em segundos"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Tipo de Exercício</label>
+                      <select
+                        value={exercise.type || ''}
+                        onChange={(e) => updateExercise(index, 'type', e.target.value)}
+                        className="input-field text-sm py-2"
+                      >
+                        <option value="">Selecione</option>
+                        <option value="cardio">Cardio</option>
+                        <option value="força">Força</option>
+                        <option value="flexibilidade">Flexibilidade</option>
+                        <option value="core">Core</option>
+                        <option value="funcional">Funcional</option>
+                        <option value="outro">Outro</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Descanso entre séries (segundos)</label>
+                      <input
+                        type="number"
+                        value={exercise.rest || 0}
+                        onChange={(e) => updateExercise(index, 'rest', parseInt(e.target.value) || 0)}
+                        className="input-field text-sm py-2"
+                        min="0"
+                        max="600"
+                        step="1"
+                        placeholder="Descanso em segundos"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Intensidade</label>
+                      <select
+                        value={exercise.intensity || ''}
+                        onChange={(e) => updateExercise(index, 'intensity', e.target.value)}
+                        className="input-field text-sm py-2"
+                      >
+                        <option value="">Selecione</option>
+                        <option value="leve">Leve</option>
+                        <option value="moderado">Moderado</option>
+                        <option value="intenso">Intenso</option>
+                      </select>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs text-gray-600 mb-1">Observações</label>
+                      <input
+                        type="text"
+                        value={exercise.notes || ''}
+                        onChange={(e) => updateExercise(index, 'notes', e.target.value)}
+                        className="input-field text-sm py-2"
+                        placeholder="Observações ou dicas do exercício"
                       />
                     </div>
                   </div>

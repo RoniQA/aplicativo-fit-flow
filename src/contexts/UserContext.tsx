@@ -33,6 +33,10 @@ export interface Exercise {
   reps: number;
   weight?: number;
   duration?: number; // para exercícios de tempo
+  type?: string;
+  rest?: number;
+  notes?: string;
+  intensity?: string;
 }
 
 export interface Meal {
