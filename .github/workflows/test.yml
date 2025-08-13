@@ -144,14 +144,20 @@ jobs:
           
           const botComment = comments.find(comment => comment.user.type === 'Bot' && comment.body.includes('Test Results'));
           
-          const commentBody = `## 🧪 **Test Results** ${{ needs.test.result == 'success' && needs.lint.result == 'success' && needs.build.result == 'success' ? '✅ PASSED' : '❌ FAILED' }}
+          const testResult = needs.test.result == 'success' && needs.lint.result == 'success' && needs.build.result == 'success';
+          const buildStatus = needs.build.result == 'success' ? '✅ Success' : '❌ Failed';
+          const lintStatus = needs.lint.result == 'success' ? '✅ Passed' : '❌ Failed';
+          const testStatus = needs.test.result == 'success' ? '✅ Passed' : '❌ Failed';
+          const qualityMessage = testResult ? '🎉 **Quality Gate PASSED!** O código está pronto para merge.' : '⚠️ **Quality Gate FAILED!** Por favor, corrija os problemas antes do merge.';
+          
+          const commentBody = `## 🧪 **Test Results** ${testResult ? '✅ PASSED' : '❌ FAILED'}
           
           ### 📊 **Coverage**: >= 90% (Required)
-          ### 🔧 **Build**: ${{ needs.build.result == 'success' ? '✅ Success' : '❌ Failed' }}
-          ### 🎯 **Linting**: ${{ needs.lint.result == 'success' ? '✅ Passed' : '❌ Failed' }}
-          ### 🧪 **Tests**: ${{ needs.test.result == 'success' ? '✅ Passed' : '❌ Failed' }}
+          ### 🔧 **Build**: ${buildStatus}
+          ### 🎯 **Linting**: ${lintStatus}
+          ### 🧪 **Tests**: ${testStatus}
           
-          ${{ needs.test.result == 'success' && needs.lint.result == 'success' && needs.build.result == 'success' ? '🎉 **Quality Gate PASSED!** O código está pronto para merge.' : '⚠️ **Quality Gate FAILED!** Por favor, corrija os problemas antes do merge.' }}
+          ${qualityMessage}
           
           ---
           *Pipeline executado em: ${{ github.event.head_commit.timestamp }}*`;
