@@ -81,7 +81,6 @@ interface UserContextType {
   addProgress: (progress: Progress) => void;
   updateUser: (updates: Partial<User>) => void;
   clearData: () => void;
-  registerThemeCallback: (callback: (user: User) => void) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -100,8 +99,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [meals, setMeals] = useState<Meal[]>([]);
   const [progress, setProgress] = useState<Progress[]>([]);
   
-  // Callback para atualizar o tema (será definido pelo ThemeProvider)
-  const [themeUpdateCallback, setThemeUpdateCallback] = useState<((user: User) => void) | null>(null);
+
 
   // Carregar dados do localStorage na inicialização
   useEffect(() => {
@@ -123,13 +121,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (!userData.dietaryPreferences) userData.dietaryPreferences = 'none';
           if (!userData.availableTime) userData.availableTime = '45min';
           setUserState(userData);
-          // Aplicar tema após um pequeno delay para garantir que o callback esteja registrado
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-          setTimeout(() => {
-            if (themeUpdateCallback) {
-              themeUpdateCallback(userData);
-            }
-          }, 100);
+
         }
 
         if (savedWorkouts) {
@@ -184,18 +176,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setUser = (newUser: User) => {
     setUserState(newUser);
-    if (themeUpdateCallback) {
-      themeUpdateCallback(newUser);
-    }
   };
 
   const updateUser = (updates: Partial<User>) => {
     if (user) {
       const updatedUser = { ...user, ...updates };
       setUserState(updatedUser);
-      if (themeUpdateCallback) {
-        themeUpdateCallback(updatedUser);
-      }
     }
   };
 
@@ -222,10 +208,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('fitflow_progress');
   };
 
-  const registerThemeCallback = (callback: (user: User) => void) => {
-    setThemeUpdateCallback(() => callback);
-  };
-
   const value: UserContextType = {
     user,
     workouts,
@@ -237,7 +219,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     addProgress,
     updateUser,
     clearData,
-    registerThemeCallback,
   };
 
   return (

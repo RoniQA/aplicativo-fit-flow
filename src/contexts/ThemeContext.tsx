@@ -20,9 +20,9 @@ export const useTheme = () => {
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<WeightTheme | null>(null);
-  const { user, registerThemeCallback } = useUser();
+  const { user } = useUser();
 
-  const updateTheme = (user: User) => {
+  const updateTheme = React.useCallback((user: User) => {
     const newTheme = getWeightTheme(user.weight, user.height);
     setTheme(newTheme);
     
@@ -37,21 +37,14 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
     
     root.style.setProperty('--gradient-primary', `linear-gradient(to right, ${newTheme.primary[500]}, ${newTheme.primary[700]})`);
-  };
-
-  // Registrar o callback quando o componente montar
-  useEffect(() => {
-    if (registerThemeCallback) {
-      registerThemeCallback(updateTheme);
-    }
-  }, [registerThemeCallback]);
+  }, []);
 
   // Aplicar tema quando o usuário mudar
   useEffect(() => {
     if (user) {
       updateTheme(user);
     }
-  }, [user]);
+  }, [user, updateTheme]);
 
   const getThemeColor = (colorKey: string, shade: string): string => {
     if (!theme) return '';
