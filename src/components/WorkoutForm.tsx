@@ -11,7 +11,7 @@ const WorkoutForm: React.FC = () => {
     notes: '',
   });
   const [exercises, setExercises] = useState<Exercise[]>([
-  { name: '', sets: 3, reps: 10, weight: 0, duration: 0, rest: 0, type: '', notes: '', intensity: '' }
+    { name: '', sets: 3, reps: 10, weight: 0, duration: 0, rest: 0, type: '', notes: '', intensity: '' }
   ]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -23,7 +23,7 @@ const WorkoutForm: React.FC = () => {
   };
 
   const addExercise = () => {
-  setExercises(prev => [...prev, { name: '', sets: 3, reps: 10, weight: 0, duration: 0, rest: 0, type: '', notes: '', intensity: '' }]);
+    setExercises(prev => [...prev, { name: '', sets: 3, reps: 10, weight: 0, duration: 0, rest: 0, type: '', notes: '', intensity: '' }]);
   };
 
   const removeExercise = (index: number) => {
@@ -63,7 +63,7 @@ const WorkoutForm: React.FC = () => {
       });
     }
     setWorkoutData({ type: 'strength', duration: 45, notes: '' });
-    setExercises([{ name: '', sets: 3, reps: 10, weight: 0 }]);
+    setExercises([{ name: '', sets: 3, reps: 10, weight: 0, duration: 0, rest: 0, type: '', notes: '', intensity: '' }]);
     alert('Treino registrado com sucesso!');
   };
 
@@ -110,7 +110,7 @@ const WorkoutForm: React.FC = () => {
         };
         const routine = maleRoutine[user.goal] || maleRoutine['gain'];
         const todayRoutine = routine.find((r) => r.day === todayName) || routine[0];
-  return todayRoutine.exercises.map(name => ({ name, sets: 3, reps: 10, duration: 0, type: 'strength' }));
+        return todayRoutine.exercises.map(name => ({ name, sets: 3, reps: 10, duration: 0, type: 'strength' }));
       } else {
         const femaleRoutine = {
           gain: [
@@ -134,7 +134,7 @@ const WorkoutForm: React.FC = () => {
         };
         const routine = femaleRoutine[user.goal] || femaleRoutine['gain'];
         const todayRoutine = routine.find((r) => r.day === todayName) || routine[0];
-  return todayRoutine.exercises.map(name => ({ name, sets: 3, reps: 10, duration: 0, type: 'strength' }));
+        return todayRoutine.exercises.map(name => ({ name, sets: 3, reps: 10, duration: 0, type: 'strength' }));
       }
     }
     return [];
@@ -152,7 +152,11 @@ const WorkoutForm: React.FC = () => {
       sets: s.sets,
       reps: s.reps || 0,
       weight: s.weight || 0,
-      duration: s.duration || 0
+      duration: s.duration || 0,
+      rest: 0,
+      type: s.type || '',
+      notes: '',
+      intensity: ''
     }));
 
     setExercises(newExercises);
@@ -161,90 +165,29 @@ const WorkoutForm: React.FC = () => {
   const personalizedSuggestion = getPersonalizedSuggestion();
 
   return (
-  <div className="min-h-screen bg-gray-50 py-8 px-4 pb-20 overflow-auto max-h-screen">
+    <div className="min-h-screen bg-gray-50 py-4 px-4 pb-20 overflow-auto">
       <div className="max-w-2xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-1 sm:mb-0">Registrar Treino</h1>
-            <p className="text-gray-600">Registre seu treino de hoje e acompanhe seu progresso</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-0">Registrar Treino</h1>
+            <p className="text-sm sm:text-base text-gray-600">Registre seu treino de hoje e acompanhe seu progresso</p>
           </div>
-          {personalizedSuggestion.length > 0 && (
-            <button
-              type="button"
-              className="btn-primary px-6 py-3 rounded-xl font-semibold whitespace-nowrap"
-              onClick={() => applySuggestion(personalizedSuggestion)}
-            >
-              Aplicar treino sugerido
-            </button>
-          )}
         </div>
 
         {/* Sugestões de Treino */}
         {personalizedSuggestion.length > 0 && (
           <div className="card mb-6">
             <div className="flex items-center space-x-3 mb-4">
-              {personalizedSuggestion.length > 0 && (
-                <div className="card mb-6">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <Target className="w-5 h-5 text-primary-600" />
-                    <h3 className="text-lg font-semibold">Treino sugerido para hoje</h3>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {personalizedSuggestion.map((suggestion, index) => (
-                      <div
-                        key={index}
-                        className="bg-primary-50 border border-primary-200 rounded-lg px-4 py-3 text-left"
-                      >
-                        <div className="font-medium text-primary-800">{suggestion.name}</div>
-                        <div className="text-xs text-primary-600">
-                          {suggestion.sets}x{suggestion.reps}
-                          {/* Exibe tempo apenas para exercícios de tempo (reps = 0) */}
-                          {suggestion.reps === 0 && suggestion.duration > 0 ? ` • ${suggestion.duration}s` : ''}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                      <input
-                        type="number"
-                        value={exercise.rest || 0}
-                        onChange={(e) => updateExercise(index, 'rest', parseInt(e.target.value) || 0)}
-                        className="input-field text-sm py-2"
-                        min="0"
-                        max="600"
-                        step="1"
-                        placeholder="Descanso em segundos"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Intensidade</label>
-                      <select
-                        value={exercise.intensity || ''}
-                        onChange={(e) => updateExercise(index, 'intensity', e.target.value)}
-                        className="input-field text-sm py-2"
-                      >
-                        <option value="">Selecione</option>
-                        <option value="leve">Leve</option>
-                        <option value="moderado">Moderado</option>
-                        <option value="intenso">Intenso</option>
-                      </select>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs text-gray-600 mb-1">Observações</label>
-                      <input
-                        type="text"
-                        value={exercise.notes || ''}
-                        onChange={(e) => updateExercise(index, 'notes', e.target.value)}
-                        className="input-field text-sm py-2"
-                        placeholder="Observações ou dicas do exercício"
-                      />
-                    </div>
+              <Target className="w-5 h-5 text-primary-600" />
+              <h3 className="text-lg font-semibold">Treino sugerido para hoje</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
               {personalizedSuggestion.map((suggestion, index) => (
                 <div
                   key={index}
                   className="bg-primary-50 border border-primary-200 rounded-lg px-4 py-3 text-left"
                 >
-                  <div className="font-medium text-primary-800">{suggestion.name}</div>
+                  <div className="font-medium text-primary-800 text-sm">{suggestion.name}</div>
                   <div className="text-xs text-primary-600">
                     {suggestion.sets}x{suggestion.reps}
                     {/* Exibe tempo apenas para exercícios de tempo (reps = 0) */}
@@ -252,6 +195,15 @@ const WorkoutForm: React.FC = () => {
                   </div>
                 </div>
               ))}
+            </div>
+            <div className="flex justify-center">
+              <button
+                type="button"
+                className="btn-primary px-6 py-3 rounded-xl font-semibold text-base whitespace-nowrap"
+                onClick={() => applySuggestion(personalizedSuggestion)}
+              >
+                Aplicar treino sugerido
+              </button>
             </div>
           </div>
         )}
@@ -340,9 +292,10 @@ const WorkoutForm: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3">
+                    {/* Nome do Exercício - Largura Total */}
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Nome</label>
+                      <label className="block text-xs text-gray-600 mb-1">Nome do Exercício *</label>
                       <input
                         type="text"
                         value={exercise.name}
@@ -352,105 +305,121 @@ const WorkoutForm: React.FC = () => {
                         required
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Séries</label>
-                      <input
-                        type="number"
-                        value={exercise.sets}
-                        onChange={(e) => updateExercise(index, 'sets', parseInt(e.target.value))}
-                        className="input-field text-sm py-2"
-                        min="1"
-                        max="10"
-                        required
-                      />
+
+                    {/* Primeira Linha - Séries e Repetições */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Séries *</label>
+                        <input
+                          type="number"
+                          value={exercise.sets}
+                          onChange={(e) => updateExercise(index, 'sets', parseInt(e.target.value))}
+                          className="input-field text-sm py-2"
+                          min="1"
+                          max="10"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Repetições *</label>
+                        <input
+                          type="number"
+                          value={exercise.reps}
+                          onChange={(e) => updateExercise(index, 'reps', parseInt(e.target.value))}
+                          className="input-field text-sm py-2"
+                          min="0"
+                          max="100"
+                          required
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Repetições</label>
-                      <input
-                        type="number"
-                        value={exercise.reps}
-                        onChange={(e) => updateExercise(index, 'reps', parseInt(e.target.value))}
-                        className="input-field text-sm py-2"
-                        min="0"
-                        max="100"
-                        required
-                      />
+
+                    {/* Segunda Linha - Peso e Tempo */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Peso (kg)</label>
+                        <input
+                          type="number"
+                          value={exercise.weight || 0}
+                          onChange={(e) => updateExercise(index, 'weight', parseFloat(e.target.value) || 0)}
+                          className="input-field text-sm py-2"
+                          min="0"
+                          step="0.5"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Tempo (segundos)</label>
+                        <input
+                          type="number"
+                          value={exercise.duration || 0}
+                          onChange={(e) => updateExercise(index, 'duration', parseInt(e.target.value) || 0)}
+                          className="input-field text-sm py-2"
+                          min="0"
+                          max="600"
+                          step="1"
+                          placeholder="Tempo em segundos"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Peso (kg)</label>
-                      <input
-                        type="number"
-                        value={exercise.weight || 0}
-                        onChange={(e) => updateExercise(index, 'weight', parseFloat(e.target.value) || 0)}
-                        className="input-field text-sm py-2"
-                        min="0"
-                        step="0.5"
-                      />
+
+                    {/* Terceira Linha - Tipo e Descanso */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Tipo de Exercício</label>
+                        <select
+                          value={exercise.type || ''}
+                          onChange={(e) => updateExercise(index, 'type', e.target.value)}
+                          className="input-field text-sm py-2"
+                        >
+                          <option value="">Selecione</option>
+                          <option value="cardio">Cardio</option>
+                          <option value="força">Força</option>
+                          <option value="flexibilidade">Flexibilidade</option>
+                          <option value="core">Core</option>
+                          <option value="funcional">Funcional</option>
+                          <option value="outro">Outro</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Descanso (segundos)</label>
+                        <input
+                          type="number"
+                          value={exercise.rest || 0}
+                          onChange={(e) => updateExercise(index, 'rest', parseInt(e.target.value) || 0)}
+                          className="input-field text-sm py-2"
+                          min="0"
+                          max="600"
+                          step="1"
+                          placeholder="Descanso entre séries"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Tempo (segundos)</label>
-                      <input
-                        type="number"
-                        value={exercise.duration || 0}
-                        onChange={(e) => updateExercise(index, 'duration', parseInt(e.target.value) || 0)}
-                        className="input-field text-sm py-2"
-                        min="0"
-                        max="600"
-                        step="1"
-                        placeholder="Tempo em segundos"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Tipo de Exercício</label>
-                      <select
-                        value={exercise.type || ''}
-                        onChange={(e) => updateExercise(index, 'type', e.target.value)}
-                        className="input-field text-sm py-2"
-                      >
-                        <option value="">Selecione</option>
-                        <option value="cardio">Cardio</option>
-                        <option value="força">Força</option>
-                        <option value="flexibilidade">Flexibilidade</option>
-                        <option value="core">Core</option>
-                        <option value="funcional">Funcional</option>
-                        <option value="outro">Outro</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Descanso entre séries (segundos)</label>
-                      <input
-                        type="number"
-                        value={exercise.rest || 0}
-                        onChange={(e) => updateExercise(index, 'rest', parseInt(e.target.value) || 0)}
-                        className="input-field text-sm py-2"
-                        min="0"
-                        max="600"
-                        step="1"
-                        placeholder="Descanso em segundos"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Intensidade</label>
-                      <select
-                        value={exercise.intensity || ''}
-                        onChange={(e) => updateExercise(index, 'intensity', e.target.value)}
-                        className="input-field text-sm py-2"
-                      >
-                        <option value="">Selecione</option>
-                        <option value="leve">Leve</option>
-                        <option value="moderado">Moderado</option>
-                        <option value="intenso">Intenso</option>
-                      </select>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs text-gray-600 mb-1">Observações</label>
-                      <input
-                        type="text"
-                        value={exercise.notes || ''}
-                        onChange={(e) => updateExercise(index, 'notes', e.target.value)}
-                        className="input-field text-sm py-2"
-                        placeholder="Observações ou dicas do exercício"
-                      />
+
+                    {/* Quarta Linha - Intensidade e Observações */}
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Intensidade</label>
+                        <select
+                          value={exercise.intensity || ''}
+                          onChange={(e) => updateExercise(index, 'intensity', e.target.value)}
+                          className="input-field text-sm py-2"
+                        >
+                          <option value="">Selecione</option>
+                          <option value="leve">Leve</option>
+                          <option value="moderado">Moderado</option>
+                          <option value="intenso">Intenso</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Observações</label>
+                        <input
+                          type="text"
+                          value={exercise.notes || ''}
+                          onChange={(e) => updateExercise(index, 'notes', e.target.value)}
+                          className="input-field text-sm py-2"
+                          placeholder="Observações ou dicas do exercício"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
