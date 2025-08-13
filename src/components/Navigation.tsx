@@ -5,8 +5,7 @@ import {
   Dumbbell, 
   Apple, 
   TrendingUp, 
-  Lightbulb,
-  User
+  Lightbulb
 } from 'lucide-react';
 
 const Navigation: React.FC = () => {

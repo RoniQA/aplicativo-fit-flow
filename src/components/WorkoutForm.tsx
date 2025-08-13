@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 import { Workout, Exercise } from '../contexts/UserContext';
-import { Plus, X, Save, Target } from 'lucide-react';
+import { Plus, X, Target } from 'lucide-react';
 
 const WorkoutForm: React.FC = () => {
   const { addWorkout, user, addProgress } = useUser();
@@ -72,7 +72,6 @@ const WorkoutForm: React.FC = () => {
     const weekDays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
     const todayIdx = new Date().getDay();
     const todayName = weekDays[todayIdx];
-    const hasLimitation = user.physicalLimitations && user.physicalLimitations.length > 0;
     if (user.workoutLocation === 'gym') {
       if (user.goal === 'lose') {
         // Emagrecimento: circuito cardio + funcional, 45-60min
