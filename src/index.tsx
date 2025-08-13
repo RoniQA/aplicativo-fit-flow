@@ -2,6 +2,7 @@ import React from 'react';
 import { Keyboard } from '@capacitor/keyboard';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import './theme.css';
 import App from './App';
 
 const root = ReactDOM.createRoot(

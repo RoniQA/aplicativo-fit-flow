@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useUser } from '../contexts/UserContext';
-import { Calendar, Target, Flame, Clock, Users } from 'lucide-react';
+import { Calendar, Target, Flame, Clock, Users, Scale } from 'lucide-react';
 import EditUserForm from './EditUserForm';
+import { getWeightCategory, calculateBMI, getBMIDescription } from '../utils/weightUtils';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Dashboard: React.FC = () => {
   const { user, workouts, meals } = useUser();
   const [showEditModal, setShowEditModal] = useState(false);
+  const { theme } = useTheme();
 
   const getGoalText = (goal: string) => {
     switch (goal) {
@@ -193,6 +196,11 @@ const Dashboard: React.FC = () => {
   const dietSuggestion = getDietSuggestion();
   const todayWorkout = getTodayWorkout();
   const todayMeals = getTodayMeals();
+  
+  // Cálculo do IMC e categoria de peso
+  const bmi = user ? calculateBMI(user.weight, user.height) : 0;
+  const weightCategory = user ? getWeightCategory(user.weight, user.height) : null;
+  const bmiDescription = getBMIDescription(bmi);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -207,11 +215,11 @@ const Dashboard: React.FC = () => {
             >
               <span style={{fontSize: 24, fontWeight: 'bold'}}>&times;</span>
             </button>
-            <EditUserForm />
+            <EditUserForm onClose={() => setShowEditModal(false)} />
           </div>
         </div>
       )}
-      <div className="bg-gradient-primary text-white p-6 pb-8">
+      <div className={`bg-gradient-to-r ${theme?.gradient || 'from-green-500 to-green-700'} text-white p-6 pb-8`}>
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -232,7 +240,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-white/20 rounded-xl p-4 text-center">
               <div className="text-2xl font-bold">{user?.weight}kg</div>
               <div className="text-sm text-white/80">Peso Atual</div>
@@ -242,12 +250,36 @@ const Dashboard: React.FC = () => {
               <div className="text-sm text-white/80">Altura</div>
             </div>
             <div className="bg-white/20 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold">{bmi.toFixed(1)}</div>
+              <div className="text-sm text-white/80">IMC</div>
+            </div>
+            <div className="bg-white/20 rounded-xl p-4 text-center">
               <div className="text-2xl font-bold">{getActivityText(user?.activityLevel || '')}</div>
               <div className="text-sm text-white/80">Nível de Atividade</div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Categoria de Peso */}
+      {weightCategory && (
+        <div className="max-w-4xl mx-auto px-6 -mt-4 mb-6">
+          <div className={`${weightCategory.bgColor} ${weightCategory.borderColor} border-2 rounded-xl p-4 text-center`}>
+            <div className="flex items-center justify-center space-x-3 mb-2">
+              <Scale className={`w-6 h-6 ${weightCategory.color}`} />
+              <h2 className={`text-xl font-bold ${weightCategory.color}`}>
+                {weightCategory.label}
+              </h2>
+            </div>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {bmiDescription}
+            </p>
+            <div className="mt-3 text-xs text-gray-600">
+              IMC: {bmi.toFixed(1)} • Classificação: {weightCategory.label}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-4xl mx-auto p-6 -mt-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -369,7 +401,7 @@ const Dashboard: React.FC = () => {
         {/* Resumo do Dia */}
         <div className="card mb-8">
           <h3 className="text-lg font-semibold mb-4">Resumo do Dia</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <div className="text-2xl font-bold text-primary-600">
                 {todayWorkout ? '✅' : '⏳'}
@@ -396,6 +428,16 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="text-sm text-gray-600 mt-1">Consistência</div>
               <div className="text-xs text-gray-500">Esta semana</div>
+            </div>
+            
+            <div className={`text-center p-4 rounded-lg ${weightCategory?.bgColor || 'bg-gray-50'}`}>
+              <div className={`text-2xl font-bold ${weightCategory?.color || 'text-gray-600'}`}>
+                {bmi.toFixed(1)}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">IMC</div>
+              <div className={`text-xs ${weightCategory?.color || 'text-gray-500'}`}>
+                {weightCategory?.label || 'N/A'}
+              </div>
             </div>
           </div>
         </div>

@@ -2,9 +2,18 @@ import React, { useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 import { User } from '../contexts/UserContext';
 
-const EditUserForm: React.FC = () => {
+interface EditUserFormProps {
+  onClose?: () => void;
+}
+
+const EditUserForm: React.FC<EditUserFormProps> = ({ onClose }) => {
   const { user, updateUser, clearData } = useUser();
   const [formData, setFormData] = useState<User | null>(user);
+
+  // Atualizar formData quando user mudar
+  React.useEffect(() => {
+    setFormData(user);
+  }, [user]);
 
   if (!formData) return <div>Nenhum usuário cadastrado.</div>;
 
@@ -23,6 +32,9 @@ const EditUserForm: React.FC = () => {
     if (formData) {
       updateUser({ ...formData });
       alert('Dados atualizados com sucesso!');
+      if (onClose) {
+        onClose();
+      }
     }
   };
 
@@ -175,10 +187,16 @@ const EditUserForm: React.FC = () => {
           if (window.confirm('Tem certeza que deseja excluir seu usuário e todos os dados?')) {
             clearData();
             alert('Usuário excluído com sucesso!');
-            window.location.reload();
+            if (onClose) {
+              onClose();
+            }
+            // Redirecionar para a página inicial após um pequeno delay
+            setTimeout(() => {
+              window.location.href = '/';
+            }, 500);
           }
         }}
-        className="w-full py-4 px-6 rounded-xl font-medium text-lg bg-red-500 text-white mt-2"
+        className="w-full py-4 px-6 rounded-xl font-medium text-lg bg-red-500 text-white mt-2 hover:bg-red-600 transition-colors"
       >
         Excluir Usuário
       </button>

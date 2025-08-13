@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Welcome from './components/Welcome';
 import Dashboard from './components/Dashboard';
 import WorkoutForm from './components/WorkoutForm';
@@ -35,9 +36,11 @@ function AppRoutes() {
 function App() {
   return (
     <UserProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
+      <ThemeProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </ThemeProvider>
     </UserProvider>
   );
 }
