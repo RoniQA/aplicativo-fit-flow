@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { useUser } from '../contexts/UserContext';
-import { Bell, BellOff, Clock, Volume2, VolumeX, Moon, Sun, Settings, Plus, Edit, Trash, ToggleLeft, ToggleRight, Sparkles, User } from 'lucide-react';
-import { generateSuggestedReminders, getOptimalWorkoutTime, getOptimalMealTimes, getOptimalHydrationTimes } from '../utils/reminderUtils';
+import { Bell, BellOff, Clock, Volume2, VolumeX, Moon, Sun, Settings, Plus, Trash, ToggleLeft, ToggleRight, Sparkles } from 'lucide-react';
+import { generateSuggestedReminders } from '../utils/reminderUtils';
 
 const NotificationSettings: React.FC = () => {
   const { 
     reminders, 
     settings, 
     addReminder, 
-    updateReminder, 
     deleteReminder, 
     toggleReminder, 
     updateSettings,
@@ -19,7 +18,6 @@ const NotificationSettings: React.FC = () => {
   const { user } = useUser();
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingReminder, setEditingReminder] = useState<string | null>(null);
   const [newReminder, setNewReminder] = useState({
     type: 'exercise' as 'exercise' | 'meal' | 'hydration' | 'progress' | 'goal',
     title: '',
@@ -82,14 +80,6 @@ const NotificationSettings: React.FC = () => {
         enabled: true
       });
       setShowAddForm(false);
-    }
-  };
-
-  const handleUpdateReminder = (id: string) => {
-    const reminder = reminders.find(r => r.id === id);
-    if (reminder) {
-      updateReminder(id, reminder);
-      setEditingReminder(null);
     }
   };
 
@@ -558,13 +548,6 @@ const NotificationSettings: React.FC = () => {
                       ) : (
                         <ToggleLeft className="w-4 h-4" />
                       )}
-                    </button>
-                    
-                    <button
-                      onClick={() => setEditingReminder(reminder.id)}
-                      className="p-1 text-gray-600 hover:text-gray-800"
-                    >
-                      <Edit className="w-4 h-4" />
                     </button>
                     
                     <button
