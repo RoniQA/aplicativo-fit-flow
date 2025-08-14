@@ -195,13 +195,35 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     
     setTimeout(() => {
       if (settings.enabled && reminder.enabled) {
-        new Notification(reminder.title, {
+        // Criar notificação com opções avançadas
+        const notification = new Notification(reminder.title, {
           body: reminder.message,
           icon: '/favicon.ico',
           tag: reminder.id,
           requireInteraction: reminder.priority === 'high',
-          silent: !settings.sound
+          silent: !settings.sound,
+          badge: reminder.icon,
+          image: reminder.icon,
+          data: {
+            reminderId: reminder.id,
+            type: reminder.type,
+            priority: reminder.priority
+          }
         });
+
+        // Eventos da notificação
+        notification.onclick = () => {
+          // Focar na janela do app
+          window.focus();
+          // Marcar como visualizada
+          markReminderTriggered(reminder.id);
+        };
+
+        // Adicionar ações se suportado (Service Worker)
+        if ('actions' in notification && reminder.priority === 'high') {
+          // As ações são configuradas no Service Worker
+          // Aqui apenas configuramos a notificação básica
+        }
 
         // Marcar como disparada
         markReminderTriggered(reminder.id);

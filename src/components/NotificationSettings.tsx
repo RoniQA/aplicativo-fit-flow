@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
-import { Bell, BellOff, Clock, Volume2, VolumeX, Moon, Sun, Settings, Plus, Edit, Trash, ToggleLeft, ToggleRight } from 'lucide-react';
+import { useUser } from '../contexts/UserContext';
+import { Bell, BellOff, Clock, Volume2, VolumeX, Moon, Sun, Settings, Plus, Edit, Trash, ToggleLeft, ToggleRight, Sparkles, User } from 'lucide-react';
+import { generateSuggestedReminders, getOptimalWorkoutTime, getOptimalMealTimes, getOptimalHydrationTimes } from '../utils/reminderUtils';
 
 const NotificationSettings: React.FC = () => {
   const { 
@@ -13,17 +15,19 @@ const NotificationSettings: React.FC = () => {
     updateSettings,
     requestNotificationPermission 
   } = useNotifications();
+  
+  const { user } = useUser();
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingReminder, setEditingReminder] = useState<string | null>(null);
   const [newReminder, setNewReminder] = useState({
-    type: 'exercise' as const,
+    type: 'exercise' as 'exercise' | 'meal' | 'hydration' | 'progress' | 'goal',
     title: '',
     message: '',
     time: '08:00',
     days: [1, 2, 3, 4, 5] as number[],
     frequency: 'daily' as const,
-    priority: 'medium' as const,
+    priority: 'medium' as 'low' | 'medium' | 'high',
     category: '',
     icon: '🔔',
     color: 'primary',
@@ -318,6 +322,79 @@ const NotificationSettings: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Horários Sugeridos Inteligentes */}
+        {user && (
+          <div className="card mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold flex items-center">
+                <Sparkles className="w-5 h-5 mr-2 text-purple-600" />
+                Horários Sugeridos para {user.name}
+              </h3>
+              <div className="text-sm text-gray-600">
+                Baseado no seu perfil: {user.goal === 'lose' ? 'Emagrecimento' : user.goal === 'gain' ? 'Ganho de Massa' : 'Manutenção'}
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+              {generateSuggestedReminders(user).map((suggestion, index) => (
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-lg p-4 bg-gradient-to-br from-purple-50 to-blue-50 hover:shadow-md transition-all cursor-pointer"
+                  onClick={() => {
+                    setNewReminder({
+                      type: suggestion.type,
+                      title: suggestion.title,
+                      message: suggestion.message,
+                      time: suggestion.time,
+                      days: suggestion.days,
+                      frequency: 'daily',
+                      priority: suggestion.priority,
+                      category: suggestion.category,
+                      icon: suggestion.icon,
+                      color: suggestion.color,
+                      enabled: true
+                    });
+                    setShowAddForm(true);
+                  }}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <span className="text-2xl">{suggestion.icon}</span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      suggestion.priority === 'high' ? 'bg-red-100 text-red-800' :
+                      suggestion.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {suggestion.priority === 'high' ? 'Alta' : suggestion.priority === 'medium' ? 'Média' : 'Baixa'}
+                    </span>
+                  </div>
+                  
+                  <div className="mb-2">
+                    <div className="font-medium text-sm text-gray-800">{suggestion.title}</div>
+                    <div className="text-xs text-gray-600 mb-2">{suggestion.message}</div>
+                    <div className="text-xs font-medium text-purple-600">
+                      ⏰ {suggestion.time} • {suggestion.days.length === 7 ? 'Todos os dias' : suggestion.days.length === 5 ? 'Seg-Sex' : 'Personalizado'}
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs text-gray-500 bg-white/50 rounded px-2 py-1">
+                    💡 {suggestion.reason}
+                  </div>
+                  
+                  <div className="mt-3 text-center">
+                    <button className="text-xs text-purple-600 hover:text-purple-800 font-medium">
+                      Usar este horário →
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="text-center text-sm text-gray-600">
+              💡 Clique em qualquer sugestão para usar como base para seu lembrete personalizado
+            </div>
+          </div>
+        )}
 
         {/* Lista de Lembretes */}
         <div className="card mb-6">
