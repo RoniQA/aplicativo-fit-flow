@@ -18,6 +18,7 @@ const NotificationSettings: React.FC = () => {
   const { user } = useUser();
 
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showConfigurations, setShowConfigurations] = useState(false);
   const [newReminder, setNewReminder] = useState({
     type: 'exercise' as 'exercise' | 'meal' | 'hydration' | 'progress' | 'goal',
     title: '',
@@ -57,29 +58,92 @@ const NotificationSettings: React.FC = () => {
   ];
 
   const handleRequestPermission = async () => {
-    const granted = await requestNotificationPermission();
-    if (granted) {
-      updateSettings({ enabled: true });
+    try {
+      console.log('=== DEBUG: handleRequestPermission ===');
+      console.log('settings.enabled antes:', settings.enabled);
+      
+      if (settings.enabled) {
+        // Se as notificações já estão ativadas, o botão "Ver Configurações" alterna a visibilidade
+        console.log('Alternando visibilidade das configurações...');
+        setShowConfigurations(!showConfigurations);
+        return;
+      }
+      
+      console.log('Chamando requestNotificationPermission...');
+      
+      const granted = await requestNotificationPermission();
+      console.log('Permissão concedida:', granted);
+      
+      if (granted) {
+        console.log('Atualizando configurações para enabled: true');
+        updateSettings({ enabled: true });
+        console.log('Configurações atualizadas. Novo valor:', settings.enabled);
+        
+        // Mostrar mensagem de sucesso
+        alert('Notificações ativadas com sucesso! Agora você pode configurar seus lembretes personalizados.');
+      } else {
+        console.log('Permissão negada pelo usuário');
+        alert('Permissão de notificação negada. Você pode ativar manualmente nas configurações do navegador.');
+      }
+    } catch (error) {
+      console.error('❌ Erro ao solicitar permissão:', error);
+      alert('Erro ao solicitar permissão de notificação. Tente novamente.');
     }
   };
 
   const handleAddReminder = () => {
-    if (newReminder.title && newReminder.message) {
+    console.log('=== DEBUG: handleAddReminder ===');
+    console.log('newReminder:', newReminder);
+    console.log('newReminder.title:', newReminder.title);
+    console.log('newReminder.message:', newReminder.message);
+    console.log('newReminder.days:', newReminder.days);
+    console.log('newReminder.title.trim():', newReminder.title.trim());
+    console.log('newReminder.message.trim():', newReminder.message.trim());
+    console.log('newReminder.days.length:', newReminder.days.length);
+    
+    if (!newReminder.title.trim()) {
+      console.log('❌ Título vazio');
+      alert('Por favor, insira um título para o lembrete');
+      return;
+    }
+    
+    if (!newReminder.message.trim()) {
+      console.log('❌ Mensagem vazia');
+      alert('Por favor, insira uma mensagem para o lembrete');
+      return;
+    }
+    
+    if (newReminder.days.length === 0) {
+      console.log('❌ Nenhum dia selecionado');
+      alert('Por favor, selecione pelo menos um dia da semana');
+      return;
+    }
+    
+    console.log('✅ Validação passou, adicionando lembrete...');
+    
+    try {
       addReminder(newReminder);
+      console.log('✅ Lembrete adicionado com sucesso!');
+      
+      // Reset do formulário
       setNewReminder({
-        type: 'exercise',
+        type: 'exercise' as 'exercise' | 'meal' | 'hydration' | 'progress' | 'goal',
         title: '',
         message: '',
         time: '08:00',
-        days: [1, 2, 3, 4, 5],
-        frequency: 'daily',
-        priority: 'medium',
+        days: [1, 2, 3, 4, 5] as number[],
+        frequency: 'daily' as const,
+        priority: 'medium' as 'low' | 'medium' | 'high',
         category: '',
         icon: '🔔',
         color: 'primary',
         enabled: true
       });
+      
       setShowAddForm(false);
+    } catch (error) {
+      console.error('❌ Erro ao adicionar lembrete:', error);
+      alert('Erro ao adicionar lembrete. Tente novamente.');
     }
   };
 
@@ -146,172 +210,177 @@ const NotificationSettings: React.FC = () => {
               onClick={handleRequestPermission}
               className={`btn ${settings.enabled ? 'btn-secondary' : 'btn-primary'}`}
             >
-              {settings.enabled ? 'Configurar' : 'Ativar Notificações'}
+              {settings.enabled 
+                ? (showConfigurations ? 'Ocultar Configurações' : 'Ver Configurações')
+                : 'Ativar Notificações'
+              }
             </button>
           </div>
         </div>
 
         {/* Configurações Gerais */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Configurações Básicas */}
-          <div className="card">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Settings className="w-5 h-5 mr-2" />
-              Configurações Básicas
-            </h3>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Som</span>
-                <button
-                  onClick={() => updateSettings({ sound: !settings.sound })}
-                  className="flex items-center"
-                >
-                  {settings.sound ? (
-                    <Volume2 className="w-5 h-5 text-green-600" />
-                  ) : (
-                    <VolumeX className="w-5 h-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
+        {showConfigurations && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Configurações Básicas */}
+            <div className="card">
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <Settings className="w-5 h-5 mr-2" />
+                Configurações Básicas
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Som</span>
+                  <button
+                    onClick={() => updateSettings({ sound: !settings.sound })}
+                    className="flex items-center"
+                  >
+                    {settings.sound ? (
+                      <Volume2 className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <VolumeX className="w-5 h-5 text-gray-400" />
+                    )}
+                  </button>
+                </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Vibração</span>
-                <button
-                  onClick={() => updateSettings({ vibration: !settings.vibration })}
-                  className="flex items-center"
-                >
-                  {settings.vibration ? (
-                    <ToggleRight className="w-5 h-5 text-green-600" />
-                  ) : (
-                    <ToggleLeft className="w-5 h-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Vibração</span>
+                  <button
+                    onClick={() => updateSettings({ vibration: !settings.vibration })}
+                    className="flex items-center"
+                  >
+                    {settings.vibration ? (
+                      <ToggleRight className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <ToggleLeft className="w-5 h-5 text-gray-400" />
+                    )}
+                  </button>
+                </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Horário Silencioso</span>
-                <button
-                  onClick={() => updateSettings({ 
-                    quietHours: { ...settings.quietHours, enabled: !settings.quietHours.enabled }
-                  })}
-                  className="flex items-center"
-                >
-                  {settings.quietHours.enabled ? (
-                    <Moon className="w-5 h-5 text-blue-600" />
-                  ) : (
-                    <Sun className="w-5 h-5 text-yellow-600" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Horário Silencioso */}
-            {settings.quietHours.enabled && (
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">Início</label>
-                    <input
-                      type="time"
-                      value={settings.quietHours.start}
-                      onChange={(e) => updateSettings({
-                        quietHours: { ...settings.quietHours, start: e.target.value }
-                      })}
-                      className="input-field text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">Fim</label>
-                    <input
-                      type="time"
-                      value={settings.quietHours.end}
-                      onChange={(e) => updateSettings({
-                        quietHours: { ...settings.quietHours, end: e.target.value }
-                      })}
-                      className="input-field text-sm"
-                    />
-                  </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Horário Silencioso</span>
+                  <button
+                    onClick={() => updateSettings({ 
+                      quietHours: { ...settings.quietHours, enabled: !settings.quietHours.enabled }
+                    })}
+                    className="flex items-center"
+                  >
+                    {settings.quietHours.enabled ? (
+                      <Moon className="w-5 h-5 text-blue-600" />
+                    ) : (
+                      <Sun className="w-5 h-5 text-yellow-600" />
+                    )}
+                  </button>
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Configurações Avançadas */}
-          <div className="card">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Clock className="w-5 h-5 mr-2" />
-              Configurações Avançadas
-            </h3>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Lembrar com antecedência (minutos)
-                </label>
-                <input
-                  type="number"
-                  value={settings.reminderAdvance}
-                  onChange={(e) => updateSettings({ 
-                    reminderAdvance: parseInt(e.target.value) || 15 
-                  })}
-                  className="input-field"
-                  min="1"
-                  max="60"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Máximo de lembretes por dia
-                </label>
-                <input
-                  type="number"
-                  value={settings.maxRemindersPerDay}
-                  onChange={(e) => updateSettings({ 
-                    maxRemindersPerDay: parseInt(e.target.value) || 10 
-                  })}
-                  className="input-field"
-                  min="1"
-                  max="20"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Permitir adiar</span>
-                <button
-                  onClick={() => updateSettings({ snoozeEnabled: !settings.snoozeEnabled })}
-                  className="flex items-center"
-                >
-                  {settings.snoozeEnabled ? (
-                    <ToggleRight className="w-5 h-5 text-green-600" />
-                  ) : (
-                    <ToggleLeft className="w-5 h-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
-
-              {settings.snoozeEnabled && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Duração do adiamento (minutos)
-                  </label>
-                  <input
-                    type="number"
-                    value={settings.snoozeDuration}
-                    onChange={(e) => updateSettings({ 
-                      snoozeDuration: parseInt(e.target.value) || 15 
-                    })}
-                    className="input-field"
-                    min="5"
-                    max="60"
-                    step="5"
-                  />
+              {/* Horário Silencioso */}
+              {settings.quietHours.enabled && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Início</label>
+                      <input
+                        type="time"
+                        value={settings.quietHours.start}
+                        onChange={(e) => updateSettings({
+                          quietHours: { ...settings.quietHours, start: e.target.value }
+                        })}
+                        className="input-field text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Fim</label>
+                      <input
+                        type="time"
+                        value={settings.quietHours.end}
+                        onChange={(e) => updateSettings({
+                          quietHours: { ...settings.quietHours, end: e.target.value }
+                        })}
+                        className="input-field text-sm"
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
+
+            {/* Configurações Avançadas */}
+            <div className="card">
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <Clock className="w-5 h-5 mr-2" />
+                Configurações Avançadas
+              </h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Lembrar com antecedência (minutos)
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.reminderAdvance}
+                    onChange={(e) => updateSettings({ 
+                      reminderAdvance: parseInt(e.target.value) || 15 
+                    })}
+                    className="input-field"
+                    min="1"
+                    max="60"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Máximo de lembretes por dia
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.maxRemindersPerDay}
+                    onChange={(e) => updateSettings({ 
+                      maxRemindersPerDay: parseInt(e.target.value) || 10 
+                    })}
+                    className="input-field"
+                    min="1"
+                    max="20"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Permitir adiar</span>
+                  <button
+                    onClick={() => updateSettings({ snoozeEnabled: !settings.snoozeEnabled })}
+                    className="flex items-center"
+                  >
+                    {settings.snoozeEnabled ? (
+                      <ToggleRight className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <ToggleLeft className="w-5 h-5 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+
+                {settings.snoozeEnabled && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Duração do adiamento (minutos)
+                    </label>
+                    <input
+                      type="number"
+                      value={settings.snoozeDuration}
+                      onChange={(e) => updateSettings({ 
+                        snoozeDuration: parseInt(e.target.value) || 15 
+                      })}
+                      className="input-field"
+                      min="5"
+                      max="60"
+                      step="5"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Horários Sugeridos Inteligentes */}
         {user && (
