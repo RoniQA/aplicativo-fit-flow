@@ -2,12 +2,14 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import Welcome from './components/Welcome';
 import Dashboard from './components/Dashboard';
 import WorkoutForm from './components/WorkoutForm';
 import MealForm from './components/MealForm';
 import Progress from './components/Progress';
 import Tips from './components/Tips';
+import NotificationSettings from './components/NotificationSettings';
 import Navigation from './components/Navigation';
 import { useUser } from './contexts/UserContext';
 
@@ -26,6 +28,7 @@ function AppRoutes() {
         <Route path="/meal" element={<MealForm />} />
         <Route path="/progress" element={<Progress />} />
         <Route path="/tips" element={<Tips />} />
+        <Route path="/notifications" element={<NotificationSettings />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
       <Navigation />
@@ -37,9 +40,11 @@ function App() {
   return (
     <UserProvider>
       <ThemeProvider>
-        <Router>
-          <AppRoutes />
-        </Router>
+        <NotificationProvider>
+          <Router>
+            <AppRoutes />
+          </Router>
+        </NotificationProvider>
       </ThemeProvider>
     </UserProvider>
   );

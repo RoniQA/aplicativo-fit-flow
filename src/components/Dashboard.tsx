@@ -4,6 +4,7 @@ import { Calendar, Target, Flame, Clock, Users, Scale } from 'lucide-react';
 import EditUserForm from './EditUserForm';
 import { getWeightCategory, calculateBMI, getBMIDescription } from '../utils/weightUtils';
 import { useTheme } from '../contexts/ThemeContext';
+import NotificationDashboard from './NotificationDashboard';
 
 const Dashboard: React.FC = () => {
   const { user, workouts, meals } = useUser();
@@ -397,6 +398,9 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Dashboard de Notificações */}
+        <NotificationDashboard />
 
         {/* Resumo do Dia */}
         <div className="card mb-8">

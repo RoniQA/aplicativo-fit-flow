@@ -5,7 +5,8 @@ import {
   Dumbbell, 
   Apple, 
   TrendingUp, 
-  Lightbulb
+  Lightbulb,
+  Bell
 } from 'lucide-react';
 
 const Navigation: React.FC = () => {
@@ -42,6 +43,12 @@ const Navigation: React.FC = () => {
       label: 'Dicas',
       icon: Lightbulb,
       color: 'text-purple-600'
+    },
+    {
+      path: '/notifications',
+      label: 'Lembretes',
+      icon: Bell,
+      color: 'text-orange-600'
     }
   ];
 
