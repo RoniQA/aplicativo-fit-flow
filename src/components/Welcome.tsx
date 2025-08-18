@@ -25,9 +25,6 @@ const Welcome: React.FC = () => {
   // Campos obrigatórios para primeira sessão
   const requiredFields = ['name', 'goal', 'activityLevel'];
   
-  // Campos opcionais que podem ser preenchidos depois
-  const optionalFields = ['age', 'weight', 'height', 'gender', 'workoutLocation', 'bodyTypeGoal', 'experienceLevel', 'dietaryPreferences', 'availableTime'];
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({

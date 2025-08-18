@@ -217,21 +217,21 @@ const Dashboard: React.FC = () => {
     }));
   };
 
-  const getDashboardMode = () => {
-    if (!user) return 'beginner';
-    
-    // Determina o modo baseado na experiência e tempo de uso
-    const daysSinceCreation = Math.ceil((Date.now() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24));
-    const workoutFrequency = workouts.length / Math.max(1, daysSinceCreation);
-    
-    if (user.experienceLevel === 'advanced' || workoutFrequency > 0.7 || daysSinceCreation > 30) {
-      return 'advanced';
-    }
-    return 'beginner';
-  };
-
   // Atualiza o modo automaticamente
   React.useEffect(() => {
+    const getDashboardMode = () => {
+      if (!user) return 'beginner';
+      
+      // Determina o modo baseado na experiência e tempo de uso
+      const daysSinceCreation = Math.ceil((Date.now() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24));
+      const workoutFrequency = workouts.length / Math.max(1, daysSinceCreation);
+      
+      if (user.experienceLevel === 'advanced' || workoutFrequency > 0.7 || daysSinceCreation > 30) {
+        return 'advanced';
+      }
+      return 'beginner';
+    };
+    
     setDashboardMode(getDashboardMode());
   }, [user, workouts]);
 

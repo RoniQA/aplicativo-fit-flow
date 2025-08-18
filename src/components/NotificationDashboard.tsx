@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useUser } from '../contexts/UserContext';
 import { Bell, X, CheckCircle, AlertCircle, Info, Star } from 'lucide-react';
 
@@ -15,7 +15,7 @@ const NotificationDashboard: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
 
   // Adicionar toast
-  const addToast = (toast: Omit<Toast, 'id'>) => {
+  const addToast = useCallback((toast: Omit<Toast, 'id'>) => {
     const id = Date.now().toString();
     const newToast = { ...toast, id };
     setToasts(prev => [...prev, newToast]);
@@ -24,7 +24,7 @@ const NotificationDashboard: React.FC = () => {
     setTimeout(() => {
       removeToast(id);
     }, toast.duration || 5000);
-  };
+  }, []);
 
   // Remover toast
   const removeToast = (id: string) => {
@@ -82,7 +82,7 @@ const NotificationDashboard: React.FC = () => {
       });
     }
 
-  }, [workouts.length, meals.length, user]);
+  }, [workouts.length, meals.length, user, addToast, workouts]);
 
   // Estatísticas de notificações
   const getNotificationStats = () => {

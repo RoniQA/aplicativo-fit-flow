@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useUser } from '../contexts/UserContext';
-import { Trophy, Star, Target, Flame, Calendar, TrendingUp, Award, Zap, Heart, Crown, Plus, Scale, Ruler, X } from 'lucide-react';
+import { Trophy, Star, Target, Flame, Calendar, TrendingUp, Zap, Heart, Crown, Plus, Scale, Ruler, X } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
