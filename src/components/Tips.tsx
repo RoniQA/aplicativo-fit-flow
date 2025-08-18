@@ -270,7 +270,7 @@ const Tips: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 pb-20">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto container-mobile">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Dicas e Informações</h1>
           <p className="text-gray-600">Conhecimento é poder! Aprenda mais sobre fitness e saúde</p>

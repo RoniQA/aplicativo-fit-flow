@@ -178,7 +178,7 @@ const NotificationSettings: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-4 px-4 pb-20 overflow-auto">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto container-mobile">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Configurações de Notificações</h1>

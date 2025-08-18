@@ -1,234 +1,311 @@
-import React from 'react';
-import { useNotifications } from '../contexts/NotificationContext';
-import { Bell, Clock, CheckCircle, AlertCircle, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useUser } from '../contexts/UserContext';
+import { Bell, X, CheckCircle, AlertCircle, Info, Star } from 'lucide-react';
+
+interface Toast {
+  id: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  message: string;
+  duration?: number;
+}
 
 const NotificationDashboard: React.FC = () => {
-  const { getTodaysReminders, getUpcomingReminders, markReminderTriggered } = useNotifications();
-  
-  const todaysReminders = getTodaysReminders();
-  const upcomingReminders = getUpcomingReminders(6); // Próximas 6 horas
+  const { user, workouts, meals } = useUser();
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
-  const getTimeStatus = (time: string) => {
-    const now = new Date();
-    const [hours, minutes] = time.split(':').map(Number);
-    const reminderTime = new Date();
-    reminderTime.setHours(hours, minutes, 0, 0);
-    
-    const diffMs = reminderTime.getTime() - now.getTime();
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    
-    if (diffMinutes < 0) return 'overdue';
-    if (diffMinutes <= 15) return 'urgent';
-    if (diffMinutes <= 60) return 'soon';
-    return 'upcoming';
+  // Adicionar toast
+  const addToast = (toast: Omit<Toast, 'id'>) => {
+    const id = Date.now().toString();
+    const newToast = { ...toast, id };
+    setToasts(prev => [...prev, newToast]);
+
+    // Auto-remover toast após duração
+    setTimeout(() => {
+      removeToast(id);
+    }, toast.duration || 5000);
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'overdue':
-        return <AlertCircle className="w-4 h-4 text-red-600" />;
-      case 'urgent':
-        return <AlertCircle className="w-4 h-4 text-orange-600" />;
-      case 'soon':
-        return <Clock className="w-4 h-4 text-yellow-600" />;
-      case 'upcoming':
-        return <Info className="w-4 h-4 text-blue-600" />;
-      default:
-        return <Info className="w-4 h-4 text-gray-600" />;
+  // Remover toast
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  // Verificar conquistas e mostrar notificações
+  useEffect(() => {
+    if (!user) return;
+
+    // Verificar primeiro treino
+    if (workouts.length === 1) {
+      addToast({
+        type: 'success',
+        message: '🎉 Parabéns! Você completou seu primeiro treino!',
+        duration: 6000
+      });
+    }
+
+    // Verificar sequência de treinos
+    if (workouts.length >= 3) {
+      const recentWorkouts = workouts.slice(-3);
+      const isConsecutive = recentWorkouts.every((workout, index) => {
+        if (index === 0) return true;
+        const prevDate = new Date(recentWorkouts[index - 1].date);
+        const currDate = new Date(workout.date);
+        const diffDays = Math.floor((currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+        return diffDays === 1;
+      });
+
+      if (isConsecutive) {
+        addToast({
+          type: 'info',
+          message: '🔥 Incrível! Você treinou 3 dias consecutivos!',
+          duration: 5000
+        });
+      }
+    }
+
+    // Verificar primeira refeição
+    if (meals.length === 1) {
+      addToast({
+        type: 'success',
+        message: '🍽️ Ótimo! Você registrou sua primeira refeição!',
+        duration: 5000
+      });
+    }
+
+    // Verificar objetivo de peso (simulado)
+    if (user.goal === 'lose' && user.weight > 70) {
+      addToast({
+        type: 'warning',
+        message: '💪 Continue firme! A consistência é a chave para alcançar seu objetivo.',
+        duration: 7000
+      });
+    }
+
+  }, [workouts.length, meals.length, user]);
+
+  // Estatísticas de notificações
+  const getNotificationStats = () => {
+    const today = new Date().toDateString();
+    const todayWorkouts = workouts.filter(w => w.date.toDateString() === today);
+    const todayMeals = meals.filter(m => m.date.toDateString() === today);
+    
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const weekWorkouts = workouts.filter(w => w.date > weekAgo);
+    const weekMeals = meals.filter(m => m.date > weekAgo);
+
+    return {
+      todayWorkouts: todayWorkouts.length,
+      todayMeals: todayMeals.length,
+      weekWorkouts: weekWorkouts.length,
+      weekMeals: weekMeals.length,
+      totalWorkouts: workouts.length,
+      totalMeals: meals.length
+    };
+  };
+
+  const stats = getNotificationStats();
+
+  // Dicas motivacionais baseadas no progresso
+  const getMotivationalTip = () => {
+    if (stats.weekWorkouts >= 5) {
+      return {
+        icon: '🏆',
+        message: 'Você é um guerreiro da semana! Mantenha essa energia!',
+        color: 'text-yellow-600'
+      };
+    } else if (stats.weekWorkouts >= 3) {
+      return {
+        icon: '🔥',
+        message: 'Bom trabalho! Você está construindo um hábito saudável.',
+        color: 'text-orange-600'
+      };
+    } else if (stats.weekWorkouts >= 1) {
+      return {
+        icon: '⭐',
+        message: 'Cada treino conta! Continue assim!',
+        color: 'text-blue-600'
+      };
+    } else {
+      return {
+        icon: '💪',
+        message: 'Que tal começar hoje? Um pequeno passo faz uma grande diferença!',
+        color: 'text-green-600'
+      };
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'overdue':
-        return 'border-red-200 bg-red-50 text-red-800';
-      case 'urgent':
-        return 'border-orange-200 bg-orange-50 text-orange-800';
-      case 'soon':
-        return 'border-yellow-200 bg-yellow-50 text-yellow-800';
-      case 'upcoming':
-        return 'border-blue-200 bg-blue-50 text-blue-800';
-      default:
-        return 'border-gray-200 bg-gray-50 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'overdue':
-        return 'Atrasado';
-      case 'urgent':
-        return 'Urgente';
-      case 'soon':
-        return 'Em breve';
-      case 'upcoming':
-        return 'Próximo';
-      default:
-        return 'Agendado';
-    }
-  };
-
-  const formatTime = (time: string) => {
-    const [hours, minutes] = time.split(':').map(Number);
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  };
-
-  const getTimeUntil = (time: string) => {
-    const now = new Date();
-    const [hours, minutes] = time.split(':').map(Number);
-    const reminderTime = new Date();
-    reminderTime.setHours(hours, minutes, 0, 0);
-    
-    if (reminderTime <= now) {
-      reminderTime.setDate(reminderTime.getDate() + 1);
-    }
-    
-    const diffMs = reminderTime.getTime() - now.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (diffHours > 0) {
-      return `em ${diffHours}h ${diffMinutes}min`;
-    }
-    return `em ${diffMinutes}min`;
-  };
+  const motivationalTip = getMotivationalTip();
 
   return (
-    <div className="space-y-6">
-      {/* Resumo do Dia */}
-      <div className="card">
+    <>
+      {/* Sistema de Toasts */}
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`toast ${toast.type} animate-slide-in flex items-center space-x-3 min-w-80`}
+          >
+            <div className="flex-shrink-0">
+              {toast.type === 'success' && <CheckCircle className="w-5 h-5" />}
+              {toast.type === 'error' && <AlertCircle className="w-5 h-5" />}
+              {toast.type === 'warning' && <AlertCircle className="w-5 h-5" />}
+              {toast.type === 'info' && <Info className="w-5 h-5" />}
+            </div>
+            <div className="flex-1 text-sm font-medium">
+              {toast.message}
+            </div>
+            <button
+              onClick={() => removeToast(toast.id)}
+              className="flex-shrink-0 text-white/80 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Dashboard de Notificações */}
+      <div className="card mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold flex items-center">
-            <Bell className="w-5 h-5 mr-2 text-primary-600" />
-            Resumo do Dia
-          </h3>
-          <div className="text-sm text-gray-600">
-            {todaysReminders.length} lembretes hoje
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-orange-100 rounded-lg">
+              <Bell className="w-5 h-5 text-orange-600" />
+            </div>
+            <h3 className="text-lg font-semibold">Notificações e Lembretes</h3>
+          </div>
+          <button
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="text-sm text-orange-600 hover:text-orange-700 transition-colors"
+          >
+            {showNotifications ? 'Ocultar' : 'Ver todas'}
+          </button>
+        </div>
+
+        {/* Estatísticas rápidas */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 form-grid-mobile">
+          <div className="text-center p-3 bg-blue-50 rounded-lg">
+            <div className="text-lg font-bold text-blue-600">{stats.todayWorkouts}</div>
+            <div className="text-xs text-blue-600">Treinos Hoje</div>
+          </div>
+          <div className="text-center p-3 bg-green-50 rounded-lg">
+            <div className="text-lg font-bold text-green-600">{stats.todayMeals}</div>
+            <div className="text-xs text-green-600">Refeições Hoje</div>
+          </div>
+          <div className="text-center p-3 bg-purple-50 rounded-lg">
+            <div className="text-lg font-bold text-purple-600">{stats.weekWorkouts}</div>
+            <div className="text-xs text-purple-600">Treinos Semana</div>
+          </div>
+          <div className="text-center p-3 bg-orange-50 rounded-lg">
+            <div className="text-lg font-bold text-orange-600">{stats.weekMeals}</div>
+            <div className="text-xs text-orange-600">Refeições Semana</div>
           </div>
         </div>
-        
-        {todaysReminders.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {todaysReminders.map(reminder => {
-              const status = getTimeStatus(reminder.time);
-              return (
-                <div
-                  key={reminder.id}
-                  className={`border rounded-lg p-4 transition-all ${getStatusColor(status)}`}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="text-2xl">{reminder.icon}</span>
-                    <div className="flex items-center space-x-1">
-                      {getStatusIcon(status)}
-                      <span className="text-xs font-medium">
-                        {getStatusText(status)}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="mb-2">
-                    <div className="font-medium text-sm">{reminder.title}</div>
-                    <div className="text-xs opacity-80">{reminder.message}</div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium">
-                      {formatTime(reminder.time)}
-                    </div>
-                    <div className="text-xs opacity-60">
-                      {getTimeUntil(reminder.time)}
-                    </div>
-                  </div>
-                  
-                  {status === 'overdue' && (
-                    <button
-                      onClick={() => markReminderTriggered(reminder.id)}
-                      className="w-full mt-3 btn-primary text-xs py-2"
-                    >
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Marcar como Concluído
-                    </button>
-                  )}
-                </div>
-              );
-            })}
+
+        {/* Dica motivacional */}
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-4">
+          <div className="flex items-start space-x-3">
+            <div className="text-2xl">{motivationalTip.icon}</div>
+            <div>
+              <p className={`text-sm font-medium ${motivationalTip.color}`}>
+                {motivationalTip.message}
+              </p>
+            </div>
           </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            <Bell className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p>Nenhum lembrete para hoje</p>
-            <p className="text-sm">Configure lembretes para manter seus hábitos</p>
+        </div>
+
+        {/* Notificações expandidas */}
+        {showNotifications && (
+          <div className="space-y-3 pt-4 border-t border-gray-200">
+            {/* Lembretes baseados no objetivo */}
+            <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+              <div className="p-1 bg-primary-100 rounded-full">
+                <Star className="w-4 h-4 text-primary-600" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-800">
+                  {user?.goal === 'lose' && 'Lembrete de Emagrecimento'}
+                  {user?.goal === 'gain' && 'Lembrete de Hipertrofia'}
+                  {user?.goal === 'maintain' && 'Lembrete de Manutenção'}
+                </div>
+                <div className="text-xs text-gray-600 mt-1">
+                  {user?.goal === 'lose' && 
+                    'Mantenha o déficit calórico e faça cardio regularmente. Hidrate-se bem!'
+                  }
+                  {user?.goal === 'gain' && 
+                    'Priorize proteínas e descanso. O músculo cresce durante o repouso!'
+                  }
+                  {user?.goal === 'maintain' && 
+                    'Equilibre treino e alimentação. A consistência é fundamental!'
+                  }
+                </div>
+              </div>
+            </div>
+
+            {/* Lembretes de hidratação */}
+            <div className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
+              <div className="p-1 bg-blue-100 rounded-full">
+                <Info className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-blue-800">
+                  Lembrete de Hidratação
+                </div>
+                <div className="text-xs text-blue-600 mt-1">
+                  Beba pelo menos 2L de água por dia. A hidratação é essencial para o desempenho!
+                </div>
+              </div>
+            </div>
+
+            {/* Lembretes de sono */}
+            <div className="flex items-start space-x-3 p-3 bg-purple-50 rounded-lg">
+              <div className="p-1 bg-purple-100 rounded-full">
+                <Info className="w-4 h-4 text-purple-600" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-purple-800">
+                  Lembrete de Sono
+                </div>
+                <div className="text-xs text-purple-600 mt-1">
+                  Durma 7-9 horas por noite. A recuperação muscular acontece durante o sono!
+                </div>
+              </div>
+            </div>
+
+            {/* Próximas metas */}
+            <div className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
+              <div className="p-1 bg-green-100 rounded-full">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-green-800">
+                  Próximas Metas
+                </div>
+                <div className="text-xs text-green-600 mt-1">
+                  {stats.weekWorkouts < 5 && `Faltam ${5 - stats.weekWorkouts} treinos para completar a semana!`}
+                  {stats.weekWorkouts >= 5 && 'Parabéns! Você completou a meta semanal de treinos!'}
+                </div>
+              </div>
+            </div>
           </div>
         )}
-      </div>
 
-      {/* Próximas Notificações */}
-      {upcomingReminders.length > 0 && (
-        <div className="card">
-          <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <Clock className="w-5 h-5 mr-2 text-secondary-600" />
-            Próximas Notificações
-          </h3>
-          
-          <div className="space-y-3">
-            {upcomingReminders.slice(0, 5).map(reminder => {
-              const status = getTimeStatus(reminder.time);
-              return (
-                <div
-                  key={reminder.id}
-                  className={`flex items-center justify-between p-3 rounded-lg border ${getStatusColor(status)}`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xl">{reminder.icon}</span>
-                    <div>
-                      <div className="font-medium text-sm">{reminder.title}</div>
-                      <div className="text-xs opacity-80">{reminder.message}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="text-right">
-                    <div className="text-sm font-medium">{formatTime(reminder.time)}</div>
-                    <div className="text-xs opacity-60">{getTimeUntil(reminder.time)}</div>
-                  </div>
-                </div>
-              );
+        {/* Botão para adicionar lembretes personalizados */}
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <button
+            onClick={() => addToast({
+              type: 'info',
+              message: '🔔 Funcionalidade de lembretes personalizados em desenvolvimento!',
+              duration: 4000
             })}
-          </div>
-          
-          {upcomingReminders.length > 5 && (
-            <div className="text-center mt-4">
-              <button className="text-sm text-primary-600 hover:text-primary-800">
-                Ver mais ({upcomingReminders.length - 5} restantes)
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="card text-center">
-          <div className="text-2xl font-bold text-primary-600">
-            {todaysReminders.filter(r => getTimeStatus(r.time) === 'overdue').length}
-          </div>
-          <div className="text-sm text-gray-600">Pendentes</div>
-        </div>
-        
-        <div className="card text-center">
-          <div className="text-2xl font-bold text-accent-600">
-            {todaysReminders.filter(r => getTimeStatus(r.time) === 'urgent').length}
-          </div>
-          <div className="text-sm text-gray-600">Urgentes</div>
-        </div>
-        
-        <div className="card text-center">
-          <div className="text-2xl font-bold text-secondary-600">
-            {todaysReminders.filter(r => getTimeStatus(r.time) === 'upcoming').length}
-          </div>
-          <div className="text-sm text-gray-600">Agendados</div>
+            className="w-full py-2 px-4 border border-orange-300 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors text-sm"
+          >
+            + Adicionar Lembrete Personalizado
+          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

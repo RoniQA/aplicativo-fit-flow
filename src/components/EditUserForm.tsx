@@ -36,7 +36,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ onClose }) => {
   };
 
   return (
-  <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
+          <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto form-mobile">
       <h2 className="text-2xl font-bold mb-4">Editar Perfil</h2>
       <div>
         <label htmlFor="gender" className="block text-sm font-medium mb-2">Gênero</label>

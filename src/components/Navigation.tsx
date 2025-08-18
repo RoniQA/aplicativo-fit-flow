@@ -57,7 +57,7 @@ const Navigation: React.FC = () => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-3 z-50 nav-mobile shadow-lg">
       <div className="max-w-md mx-auto">
         <div className="flex justify-around items-center">
           {navItems.map((item) => {
@@ -68,10 +68,10 @@ const Navigation: React.FC = () => {
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`flex flex-col items-center space-y-1 py-2 px-3 rounded-lg transition-all duration-200 ${
+                className={`flex flex-col items-center space-y-1 py-3 px-2 rounded-xl transition-all duration-200 btn-touch ${
                   active 
-                    ? 'bg-primary-50 text-primary-600' 
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    ? 'bg-primary-50 text-primary-600 shadow-sm' 
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 active:bg-gray-100'
                 }`}
               >
                 <Icon className={`w-6 h-6 ${active ? item.color : ''}`} />

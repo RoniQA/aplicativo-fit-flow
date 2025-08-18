@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useUser } from '../contexts/UserContext';
 import { User } from '../contexts/UserContext';
-import { Dumbbell, Target, TrendingUp, Heart } from 'lucide-react';
+import { Dumbbell, Target, TrendingUp, Heart, Info, CheckCircle } from 'lucide-react';
 
 const Welcome: React.FC = () => {
   const { setUser } = useUser();
@@ -22,6 +22,12 @@ const Welcome: React.FC = () => {
     availableTime: '45min' as User['availableTime'],
   });
 
+  // Campos obrigatórios para primeira sessão
+  const requiredFields = ['name', 'goal', 'activityLevel'];
+  
+  // Campos opcionais que podem ser preenchidos depois
+  const optionalFields = ['age', 'weight', 'height', 'gender', 'workoutLocation', 'bodyTypeGoal', 'experienceLevel', 'dietaryPreferences', 'availableTime'];
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -32,21 +38,36 @@ const Welcome: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newUser: User = {
-      id: Date.now().toString(),
-      name: formData.name,
-      age: parseInt(formData.age),
-      weight: parseFloat(formData.weight),
-      height: parseFloat(formData.height),
-      gender: formData.gender as User['gender'],
-      goal: formData.goal as User['goal'],
-      activityLevel: formData.activityLevel as User['activityLevel'],
+    
+    // Valores padrão para campos não preenchidos
+    const defaultValues = {
+      age: formData.age || '25',
+      weight: formData.weight || '70',
+      height: formData.height || '170',
+      gender: formData.gender || 'male',
       workoutLocation: formData.workoutLocation,
       bodyTypeGoal: formData.bodyTypeGoal,
       experienceLevel: formData.experienceLevel,
       physicalLimitations: formData.physicalLimitations,
       dietaryPreferences: formData.dietaryPreferences,
       availableTime: formData.availableTime,
+    };
+
+    const newUser: User = {
+      id: Date.now().toString(),
+      name: formData.name,
+      age: parseInt(defaultValues.age),
+      weight: parseFloat(defaultValues.weight),
+      height: parseFloat(defaultValues.height),
+      gender: defaultValues.gender as User['gender'],
+      goal: formData.goal as User['goal'],
+      activityLevel: formData.activityLevel as User['activityLevel'],
+      workoutLocation: defaultValues.workoutLocation,
+      bodyTypeGoal: defaultValues.bodyTypeGoal,
+      experienceLevel: defaultValues.experienceLevel,
+      physicalLimitations: defaultValues.physicalLimitations,
+      dietaryPreferences: defaultValues.dietaryPreferences,
+      availableTime: defaultValues.availableTime,
       createdAt: new Date(),
     };
 
@@ -54,11 +75,38 @@ const Welcome: React.FC = () => {
   };
 
   const isFormValid = () => {
-    return formData.name && formData.age && formData.weight && 
-           formData.height && formData.goal && formData.activityLevel &&
-           formData.workoutLocation && formData.bodyTypeGoal && 
-           formData.experienceLevel && formData.dietaryPreferences && 
-           formData.availableTime;
+    return requiredFields.every(field => formData[field as keyof typeof formData]);
+  };
+
+  const getFieldStatus = (fieldName: string) => {
+    if (requiredFields.includes(fieldName)) {
+      return formData[fieldName as keyof typeof formData] ? 'filled' : 'required';
+    }
+    return formData[fieldName as keyof typeof formData] ? 'filled' : 'optional';
+  };
+
+  const getFieldIcon = (fieldName: string) => {
+    const status = getFieldStatus(fieldName);
+    switch (status) {
+      case 'filled':
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'required':
+        return <Info className="w-4 h-4 text-red-500" />;
+      case 'optional':
+        return <Info className="w-4 h-4 text-blue-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const getFieldLabel = (fieldName: string) => {
+    const status = getFieldStatus(fieldName);
+    if (status === 'required') {
+      return 'Obrigatório';
+    } else if (status === 'optional') {
+      return 'Opcional';
+    }
+    return '';
   };
 
   if (step === 1) {
@@ -103,16 +151,24 @@ const Welcome: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md mx-auto container-mobile">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Vamos começar!</h2>
           <p className="text-gray-600">Conte-nos sobre você para personalizarmos sua experiência</p>
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="text-sm text-blue-800">
+              <strong>💡 Dica:</strong> Preencha apenas os campos obrigatórios para começar. Você pode completar seu perfil depois!
+            </div>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Campos obrigatórios */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               Nome
+              {getFieldIcon('name')}
+              <span className="text-xs text-gray-500">({getFieldLabel('name')})</span>
             </label>
             <input
               type="text"
@@ -125,79 +181,11 @@ const Welcome: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Idade
-              </label>
-              <input
-                type="number"
-                name="age"
-                value={formData.age}
-                onChange={handleInputChange}
-                className="input-field"
-                placeholder="25"
-                min="13"
-                max="100"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Peso (kg)
-              </label>
-              <input
-                type="number"
-                name="weight"
-                value={formData.weight}
-                onChange={handleInputChange}
-                className="input-field"
-                placeholder="70"
-                min="30"
-                max="300"
-                step="0.1"
-                required
-              />
-            </div>
-          </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Altura (cm)
-            </label>
-            <input
-              type="number"
-              name="height"
-              value={formData.height}
-              onChange={handleInputChange}
-              className="input-field"
-              placeholder="170"
-              min="100"
-              max="250"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Gênero
-            </label>
-            <select
-              name="gender"
-              value={formData.gender || ''}
-              onChange={handleInputChange}
-              className="input-field"
-              required
-            >
-              <option value="">Selecione</option>
-              <option value="male">Masculino</option>
-              <option value="female">Feminino</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               Objetivo Principal
+              {getFieldIcon('goal')}
+              <span className="text-xs text-gray-500">({getFieldLabel('goal')})</span>
             </label>
             <select
               name="goal"
@@ -214,8 +202,10 @@ const Welcome: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               Nível de Atividade
+              {getFieldIcon('activityLevel')}
+              <span className="text-xs text-gray-500">({getFieldLabel('activityLevel')})</span>
             </label>
             <select
               name="activityLevel"
@@ -231,16 +221,102 @@ const Welcome: React.FC = () => {
             </select>
           </div>
 
+          {/* Separador visual */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-gray-50 text-gray-500">Campos opcionais (preencha depois se quiser)</span>
+            </div>
+          </div>
+
+          {/* Campos opcionais */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                Idade
+                {getFieldIcon('age')}
+                <span className="text-xs text-gray-500">({getFieldLabel('age')})</span>
+              </label>
+              <input
+                type="number"
+                name="age"
+                value={formData.age}
+                onChange={handleInputChange}
+                className="input-field"
+                placeholder="25"
+                min="13"
+                max="100"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                Peso (kg)
+                {getFieldIcon('weight')}
+                <span className="text-xs text-gray-500">({getFieldLabel('weight')})</span>
+              </label>
+              <input
+                type="number"
+                name="weight"
+                value={formData.weight}
+                onChange={handleInputChange}
+                className="input-field"
+                placeholder="70"
+                min="30"
+                max="300"
+                step="0.1"
+              />
+            </div>
+          </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+              Altura (cm)
+              {getFieldIcon('height')}
+              <span className="text-xs text-gray-500">({getFieldLabel('height')})</span>
+            </label>
+            <input
+              type="number"
+              name="height"
+              value={formData.height}
+              onChange={handleInputChange}
+              className="input-field"
+              placeholder="170"
+              min="100"
+              max="250"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+              Gênero
+              {getFieldIcon('gender')}
+              <span className="text-xs text-gray-500">({getFieldLabel('gender')})</span>
+            </label>
+            <select
+              name="gender"
+              value={formData.gender || ''}
+              onChange={handleInputChange}
+              className="input-field"
+            >
+              <option value="">Selecione</option>
+              <option value="male">Masculino</option>
+              <option value="female">Feminino</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               Onde você prefere treinar?
+              {getFieldIcon('workoutLocation')}
+              <span className="text-xs text-gray-500">({getFieldLabel('workoutLocation')})</span>
             </label>
             <select
               name="workoutLocation"
               value={formData.workoutLocation}
               onChange={handleInputChange}
               className="input-field"
-              required
             >
               <option value="home">🏠 Em Casa</option>
               <option value="gym">🏋️ Academia</option>
@@ -251,15 +327,16 @@ const Welcome: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               Que tipo de corpo você deseja ter?
+              {getFieldIcon('bodyTypeGoal')}
+              <span className="text-xs text-gray-500">({getFieldLabel('bodyTypeGoal')})</span>
             </label>
             <select
               name="bodyTypeGoal"
               value={formData.bodyTypeGoal}
               onChange={handleInputChange}
               className="input-field"
-              required
             >
               <option value="athletic">🏃 Atlético (resistência + força)</option>
               <option value="lean">💪 Magro e definido</option>
@@ -270,15 +347,16 @@ const Welcome: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               Qual seu nível de experiência?
+              {getFieldIcon('experienceLevel')}
+              <span className="text-xs text-gray-500">({getFieldLabel('experienceLevel')})</span>
             </label>
             <select
               name="experienceLevel"
               value={formData.experienceLevel}
               onChange={handleInputChange}
               className="input-field"
-              required
             >
               <option value="beginner">🌱 Iniciante (0-6 meses)</option>
               <option value="intermediate">📈 Intermediário (6 meses - 2 anos)</option>
@@ -287,15 +365,16 @@ const Welcome: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               Tempo disponível para treino
+              {getFieldIcon('availableTime')}
+              <span className="text-xs text-gray-500">({getFieldLabel('availableTime')})</span>
             </label>
             <select
               name="availableTime"
               value={formData.availableTime}
               onChange={handleInputChange}
               className="input-field"
-              required
             >
               <option value="15min">⏰ 15 minutos</option>
               <option value="30min">⏰ 30 minutos</option>
@@ -307,15 +386,16 @@ const Welcome: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               Preferências alimentares
+              {getFieldIcon('dietaryPreferences')}
+              <span className="text-xs text-gray-500">({getFieldLabel('dietaryPreferences')})</span>
             </label>
             <select
               name="dietaryPreferences"
               value={formData.dietaryPreferences}
               onChange={handleInputChange}
               className="input-field"
-              required
             >
               <option value="none">🍽️ Sem restrições</option>
               <option value="vegetarian">🥬 Vegetariano</option>

@@ -21,5 +21,18 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#22c55e",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "pt-BR",
+  "description": "Seu Personal Trainer Digital - Acompanhe treinos, refeições e progresso fitness",
+  "categories": ["health", "fitness", "lifestyle"],
+  "screenshots": [
+    {
+      "src": "screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
 }

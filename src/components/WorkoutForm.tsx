@@ -165,7 +165,7 @@ const WorkoutForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-4 px-4 pb-20 overflow-auto">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto container-mobile">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-0">Registrar Treino</h1>

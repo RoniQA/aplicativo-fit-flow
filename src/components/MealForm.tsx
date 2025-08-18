@@ -133,7 +133,7 @@ const MealForm: React.FC = () => {
 
   return (
   <div className="min-h-screen bg-gray-50 py-8 px-4 pb-20 overflow-auto max-h-screen">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto container-mobile">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Registrar Refeição</h1>
           <p className="text-gray-600">Registre o que você comeu e acompanhe sua nutrição</p>
